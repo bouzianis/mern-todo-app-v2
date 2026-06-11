@@ -10,3 +10,11 @@ frontend/crash.log
 
 # Do not push
 ANALYSIS.md
+
+# Root
+node_modules/
+package-lock.json
+
+# Documentation (not pushed)
+New-Freatures/
+Postman-testing/

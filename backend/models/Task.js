@@ -3,6 +3,11 @@ const mongoose = require("mongoose");
 const taskSchema = new mongoose.Schema({
   title: { type: String, required: true },
   completed: { type: Boolean, default: false },
+  status: {
+    type: String,
+    enum: ['à faire', 'en cours', 'terminée'],
+    default: 'à faire',
+  },
   category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", default: null },
   dueDate: { type: Date, default: null },
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },

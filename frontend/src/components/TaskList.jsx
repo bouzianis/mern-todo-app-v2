@@ -1,11 +1,23 @@
 import React, { useState } from 'react';
 import api from '../axiosConfig';
 
+const STATUS_OPTIONS = [
+  { value: 'à faire', label: 'À faire', badgeClass: 'badge-info' },
+  { value: 'en cours', label: 'En cours', badgeClass: 'badge-warning' },
+  { value: 'terminée', label: 'Terminée', badgeClass: 'badge-success' },
+];
+
+const getStatusBadge = (status) => {
+  const opt = STATUS_OPTIONS.find((o) => o.value === status);
+  return opt || STATUS_OPTIONS[0];
+};
+
 const TaskList = ({ tasks, setTasks, categories = [] }) => {
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [editCategory, setEditCategory] = useState('');
   const [editDueDate, setEditDueDate] = useState('');
+  const [editStatus, setEditStatus] = useState('à faire');
 
   const deleteTask = async (id) => {
     if (!id) return;
@@ -42,6 +54,7 @@ const TaskList = ({ tasks, setTasks, categories = [] }) => {
     setEditTitle(task.title);
     setEditCategory(task.category?._id || '');
     setEditDueDate(task.dueDate ? task.dueDate.split('T')[0] : '');
+    setEditStatus(task.status || 'à faire');
   };
 
   const cancelEdit = () => {
@@ -49,6 +62,7 @@ const TaskList = ({ tasks, setTasks, categories = [] }) => {
     setEditTitle('');
     setEditCategory('');
     setEditDueDate('');
+    setEditStatus('à faire');
   };
 
   const saveEdit = async (id) => {
@@ -58,12 +72,14 @@ const TaskList = ({ tasks, setTasks, categories = [] }) => {
         title: editTitle.trim(),
         category: editCategory || null,
         dueDate: editDueDate || null,
+        status: editStatus,
       });
       setTasks((prev) => prev.map((t) => (t._id === id ? res.data : t)));
       setEditingId(null);
       setEditTitle('');
       setEditCategory('');
       setEditDueDate('');
+      setEditStatus('à faire');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur lors de la modification');
     }
@@ -100,6 +116,17 @@ const TaskList = ({ tasks, setTasks, categories = [] }) => {
                       autoFocus
                     />
                     <select
+                      value={editStatus}
+                      onChange={(e) => setEditStatus(e.target.value)}
+                      className="select select-bordered select-sm"
+                    >
+                      {STATUS_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                    <select
                       value={editCategory}
                       onChange={(e) => setEditCategory(e.target.value)}
                       className="select select-bordered select-sm"
@@ -127,6 +154,14 @@ const TaskList = ({ tasks, setTasks, categories = [] }) => {
                       <p className="text-sm text-base-content/60">
                         Ajoutée le {new Date(task.createdAt).toLocaleDateString()}
                       </p>
+                      {(() => {
+                        const sb = getStatusBadge(task.status || 'à faire');
+                        return (
+                          <span className={`badge badge-sm ${sb.badgeClass}`}>
+                            {sb.label}
+                          </span>
+                        );
+                      })()}
                       {task.category && (
                         <span
                           className="badge badge-sm text-white"

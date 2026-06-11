@@ -19,6 +19,7 @@ router.post('/', auth, async (req, res) => {
   try {
     const task = new Task({
       title: req.body.title,
+      status: req.body.status || 'à faire',
       category: req.body.category || null,
       dueDate: req.body.dueDate || null,
       user: req.user.id,
@@ -40,7 +41,19 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(404).json({ message: 'Tâche non trouvée ou non autorisée' });
     }
     if (req.body.title !== undefined) task.title = req.body.title;
-    if (req.body.completed !== undefined) task.completed = req.body.completed;
+    if (req.body.completed !== undefined) {
+      task.completed = req.body.completed;
+      // Sync status when checkbox is toggled
+      if (req.body.status === undefined) {
+        task.status = req.body.completed ? 'terminée' : 'à faire';
+      }
+    }
+    if (req.body.status !== undefined) {
+      task.status = req.body.status;
+      // Sync completed with status
+      if (req.body.status === 'terminée') task.completed = true;
+      else if (req.body.status === 'à faire' || req.body.status === 'en cours') task.completed = false;
+    }
     if (req.body.category !== undefined) task.category = req.body.category || null;
     if (req.body.dueDate !== undefined) task.dueDate = req.body.dueDate || null;
     await task.save();
