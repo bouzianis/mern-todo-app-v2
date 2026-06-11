@@ -26,6 +26,23 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
+// Modifier une tâche
+router.put('/:id', auth, async (req, res) => {
+  try {
+    const task = await Task.findOne({ _id: req.params.id, user: req.user.id });
+    if (!task) {
+      return res.status(404).json({ message: 'Tâche non trouvée ou non autorisée' });
+    }
+    if (req.body.title !== undefined) task.title = req.body.title;
+    if (req.body.completed !== undefined) task.completed = req.body.completed;
+    await task.save();
+    res.json(task);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Erreur serveur lors de la modification' });
+  }
+});
+
 // Supprimer une tâche
 router.delete('/:id', auth, async (req, res) => {
   try {
