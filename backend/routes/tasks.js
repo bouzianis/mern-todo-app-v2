@@ -6,7 +6,7 @@ const auth = require('../middleware/auth');
 // Récupérer les tâches de l'utilisateur connecté
 router.get('/', auth, async (req, res) => {
   try {
-    const tasks = await Task.find({ user: req.user.id });
+    const tasks = await Task.find({ user: req.user.id }).populate('category');
     res.json(tasks);
   } catch (err) {
     console.error(err);
@@ -17,9 +17,14 @@ router.get('/', auth, async (req, res) => {
 // Ajouter une tâche
 router.post('/', auth, async (req, res) => {
   try {
-    const task = new Task({ title: req.body.title, user: req.user.id });
+    const task = new Task({
+      title: req.body.title,
+      category: req.body.category || null,
+      user: req.user.id,
+    });
     await task.save();
-    res.json(task);
+    const populated = await task.populate('category');
+    res.json(populated);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Erreur serveur' });
@@ -35,8 +40,10 @@ router.put('/:id', auth, async (req, res) => {
     }
     if (req.body.title !== undefined) task.title = req.body.title;
     if (req.body.completed !== undefined) task.completed = req.body.completed;
+    if (req.body.category !== undefined) task.category = req.body.category || null;
     await task.save();
-    res.json(task);
+    const populated = await task.populate('category');
+    res.json(populated);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Erreur serveur lors de la modification' });

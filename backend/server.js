@@ -26,8 +26,10 @@ mongoose
 // Ajouter les routes
 const taskRoutes = require("./routes/tasks");
 const authRoutes = require('./routes/auth');
+const categoryRoutes = require('./routes/categories');
 app.use('/api/auth', authRoutes);
 app.use("/api/tasks", taskRoutes);
+app.use('/api/categories', categoryRoutes);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => console.log(`Serveur démarré sur le port ${PORT}`));

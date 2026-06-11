@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import api from '../axiosConfig';
 
-const TaskList = ({ tasks, setTasks }) => {
+const TaskList = ({ tasks, setTasks, categories = [] }) => {
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState('');
+  const [editCategory, setEditCategory] = useState('');
 
   const deleteTask = async (id) => {
     if (!id) return;
@@ -27,20 +28,26 @@ const TaskList = ({ tasks, setTasks }) => {
   const startEdit = (task) => {
     setEditingId(task._id);
     setEditTitle(task.title);
+    setEditCategory(task.category?._id || '');
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditTitle('');
+    setEditCategory('');
   };
 
   const saveEdit = async (id) => {
     if (!editTitle.trim()) return;
     try {
-      const res = await api.put(`/tasks/${id}`, { title: editTitle.trim() });
+      const res = await api.put(`/tasks/${id}`, {
+        title: editTitle.trim(),
+        category: editCategory || null,
+      });
       setTasks((prev) => prev.map((t) => (t._id === id ? res.data : t)));
       setEditingId(null);
       setEditTitle('');
+      setEditCategory('');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur lors de la modification');
     }
@@ -65,24 +72,48 @@ const TaskList = ({ tasks, setTasks }) => {
                   className="checkbox checkbox-primary checkbox-sm"
                 />
                 {editingId === task._id ? (
-                  <input
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') saveEdit(task._id);
-                      if (e.key === 'Escape') cancelEdit();
-                    }}
-                    className="input input-bordered input-sm flex-1"
-                    autoFocus
-                  />
+                  <div className="flex-1 flex flex-col gap-2">
+                    <input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') saveEdit(task._id);
+                        if (e.key === 'Escape') cancelEdit();
+                      }}
+                      className="input input-bordered input-sm"
+                      autoFocus
+                    />
+                    <select
+                      value={editCategory}
+                      onChange={(e) => setEditCategory(e.target.value)}
+                      className="select select-bordered select-sm"
+                    >
+                      <option value="">Sans catégorie</option>
+                      {categories.map((cat) => (
+                        <option key={cat._id} value={cat._id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 ) : (
                   <div className="flex-1">
                     <h3 className={`text-lg font-medium text-base-content ${task.completed ? 'line-through opacity-50' : ''}`}>
                       {task.title}
                     </h3>
-                    <p className="text-sm text-base-content/60">
-                      Ajoutée le {new Date(task.createdAt).toLocaleDateString()}
-                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-sm text-base-content/60">
+                        Ajoutée le {new Date(task.createdAt).toLocaleDateString()}
+                      </p>
+                      {task.category && (
+                        <span
+                          className="badge badge-sm text-white"
+                          style={{ backgroundColor: task.category.color }}
+                        >
+                          {task.category.name}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
