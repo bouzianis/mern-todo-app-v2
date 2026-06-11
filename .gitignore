@@ -1,0 +1,12 @@
+# Backend
+backend/node_modules/
+backend/.env
+backend/uploads/
+
+# Frontend
+frontend/node_modules/
+frontend/build/
+frontend/crash.log
+
+# Do not push
+ANALYSIS.md
