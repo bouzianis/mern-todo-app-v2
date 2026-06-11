@@ -4,6 +4,7 @@ import api from "../axiosConfig";
 const TaskForm = ({ setTasks, categories = [] }) => {
   const [newTask, setNewTask] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [dueDate, setDueDate] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -11,10 +12,12 @@ const TaskForm = ({ setTasks, categories = [] }) => {
     try {
       const payload = { title: newTask };
       if (selectedCategory) payload.category = selectedCategory;
+      if (dueDate) payload.dueDate = dueDate;
       const res = await api.post("/tasks", payload);
       setTasks((prev) => [...prev, res.data]);
       setNewTask("");
       setSelectedCategory("");
+      setDueDate("");
     } catch (err) {
       alert("Erreur lors de l'ajout de la tâche");
     }
@@ -41,6 +44,13 @@ const TaskForm = ({ setTasks, categories = [] }) => {
           </option>
         ))}
       </select>
+      <input
+        type="date"
+        value={dueDate}
+        onChange={(e) => setDueDate(e.target.value)}
+        className="input input-bordered input-sm w-44"
+        title="Date d'échéance"
+      />
       <button type="submit" className="btn btn-primary">
         Ajouter
       </button>

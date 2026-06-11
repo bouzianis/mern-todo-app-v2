@@ -5,6 +5,7 @@ const TaskList = ({ tasks, setTasks, categories = [] }) => {
   const [editingId, setEditingId] = useState(null);
   const [editTitle, setEditTitle] = useState('');
   const [editCategory, setEditCategory] = useState('');
+  const [editDueDate, setEditDueDate] = useState('');
 
   const deleteTask = async (id) => {
     if (!id) return;
@@ -25,16 +26,29 @@ const TaskList = ({ tasks, setTasks, categories = [] }) => {
     }
   };
 
+  const isOverdue = (task) => {
+    if (!task.dueDate || task.completed) return false;
+    return new Date(task.dueDate) < new Date(new Date().toDateString());
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
+
   const startEdit = (task) => {
     setEditingId(task._id);
     setEditTitle(task.title);
     setEditCategory(task.category?._id || '');
+    setEditDueDate(task.dueDate ? task.dueDate.split('T')[0] : '');
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditTitle('');
     setEditCategory('');
+    setEditDueDate('');
   };
 
   const saveEdit = async (id) => {
@@ -43,11 +57,13 @@ const TaskList = ({ tasks, setTasks, categories = [] }) => {
       const res = await api.put(`/tasks/${id}`, {
         title: editTitle.trim(),
         category: editCategory || null,
+        dueDate: editDueDate || null,
       });
       setTasks((prev) => prev.map((t) => (t._id === id ? res.data : t)));
       setEditingId(null);
       setEditTitle('');
       setEditCategory('');
+      setEditDueDate('');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur lors de la modification');
     }
@@ -95,13 +111,19 @@ const TaskList = ({ tasks, setTasks, categories = [] }) => {
                         </option>
                       ))}
                     </select>
+                    <input
+                      type="date"
+                      value={editDueDate}
+                      onChange={(e) => setEditDueDate(e.target.value)}
+                      className="input input-bordered input-sm"
+                    />
                   </div>
                 ) : (
                   <div className="flex-1">
                     <h3 className={`text-lg font-medium text-base-content ${task.completed ? 'line-through opacity-50' : ''}`}>
                       {task.title}
                     </h3>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <p className="text-sm text-base-content/60">
                         Ajoutée le {new Date(task.createdAt).toLocaleDateString()}
                       </p>
@@ -111,6 +133,11 @@ const TaskList = ({ tasks, setTasks, categories = [] }) => {
                           style={{ backgroundColor: task.category.color }}
                         >
                           {task.category.name}
+                        </span>
+                      )}
+                      {task.dueDate && (
+                        <span className={`badge badge-sm ${isOverdue(task) ? 'badge-error' : 'badge-warning'}`}>
+                          {isOverdue(task) ? 'En retard' : 'Échéance'} {formatDate(task.dueDate)}
                         </span>
                       )}
                     </div>

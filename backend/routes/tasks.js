@@ -20,6 +20,7 @@ router.post('/', auth, async (req, res) => {
     const task = new Task({
       title: req.body.title,
       category: req.body.category || null,
+      dueDate: req.body.dueDate || null,
       user: req.user.id,
     });
     await task.save();
@@ -41,6 +42,7 @@ router.put('/:id', auth, async (req, res) => {
     if (req.body.title !== undefined) task.title = req.body.title;
     if (req.body.completed !== undefined) task.completed = req.body.completed;
     if (req.body.category !== undefined) task.category = req.body.category || null;
+    if (req.body.dueDate !== undefined) task.dueDate = req.body.dueDate || null;
     await task.save();
     const populated = await task.populate('category');
     res.json(populated);
