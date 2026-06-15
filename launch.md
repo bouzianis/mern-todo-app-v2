@@ -28,7 +28,7 @@ mongod --dbpath C:\Users\your_workspace\data\db
 ### 2. Backend — Express API (Port 3001)
 
 ```powershell
-cd C:\Users\MB\Desktop\MERN-Projects\mern-todo-app-v2\backend
+cd C:\User\\your_workspace\MERN-Projects\mern-todo-app-v2\backend
 
 # First time only — install dependencies
 npm install
@@ -49,7 +49,7 @@ The backend connects to `mongodb://localhost:27017/mern-todo-v2` and listens on 
 #### Production build
 
 ```powershell
-cd C:\Users\MB\Desktop\MERN-Projects\mern-todo-app-v2\frontend
+cd C:\Users\your_workspace\mern-todo-app-v2\frontend
 
 # First time only — install dependencies
 npm install
